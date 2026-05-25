@@ -29,14 +29,18 @@ private:
     static constexpr int MAX_MEM = 65536;
     //
 
-    Memory();
+
     std::array<uint8_t, MAX_MEM> mem{};  // {} zero-initializes everything
-    ~Memory();
+
 public:
+    Memory();
     bool LoadImage(const std::filesystem::path& path, Word startAddr); // load memory image from file
     Byte ReadByte(Word addr) const;
 
     void WriteByte(Word addr, Byte data);
+
+
+    ~Memory();
 
 
 
