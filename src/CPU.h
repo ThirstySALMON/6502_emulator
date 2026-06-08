@@ -6,6 +6,7 @@
 
 class CPU {
 public:
+
     Byte    A      = 0x00;
     Byte    X      = 0x00;
     Byte    Y      = 0x00;
@@ -13,6 +14,7 @@ public:
     Word    PC     = 0x0000;
     Byte    status = 0x00;
     int32_t Cycles = 0;
+
 
     enum FLAGS : uint8_t {
         C = (1 << 0),
@@ -25,13 +27,83 @@ public:
         N = (1 << 7),
     };
 
-    CPU() = default;
+
+
+
+    CPU();
 
     void reset(Memory& mem);
     void clock(Memory& mem , int32_t);
 
     void setflag(FLAGS f, bool value);
     bool getflag(FLAGS f) const;
+
+private:
+    // helpers
+    Memory* mem = nullptr; // pointer to memory
+    Word AbsAddr = 0x0000; // effective address after address resolution
+    Byte fetched = 0x00;   // fetched operand value for operations
+    struct Instruction {
+        const char*      name; // inst name
+        void (CPU::*operate)(); // operation
+        void (CPU::*addrmode)(); // addressing mode
+        uint8_t          cycles; // cycles taken
+    };
+
+    Byte FetchByte();  // fetches the byte at memory address PC and increments PC by 1
+    Byte Fetch();      // fetches data using AbsAddr (or returns fetched for IMM mode)
+
+
+    Instruction DecodeInst (Byte);
+
+
+
+
+    // Opcode -> Operation , addressing mode and cycle count
+    std::array<Instruction, 256> lookup; // table for the 256 opcodes of the 6502
+
+    // Addressing modes
+    void IMM();  // Immediate
+    void ZP0();  // Zero page
+    void ZPX();  // Zero page, X
+    void ZPY();  // Zero page, Y
+    void ABS();  // Absolute
+    void ABX();  // Absolute, X
+    void ABY();  // Absolute, Y
+    void IND();  // Indirect
+    void IZX();  // Indirect, X
+    void IZY();  // Indirect, Y
+    void REL();  // Relative  (branches)
+    void IMP();  // Implied   (no operand)
+
+    // Operations
+    void LDA(); void STA();
+    void LDX(); void STX();
+    void LDY(); void STY();
+    void JMP(); void JSR(); void RTS();
+    void AND(); void ORA(); void EOR();
+    void ADC(); void SBC();
+    void INC(); void DEC();
+    void INX(); void DEX();
+    void INY(); void DEY();
+    void CMP(); void CPX(); void CPY();
+    void BEQ(); void BNE();
+    void BCS(); void BCC();
+    void BMI(); void BPL();
+    void BVS(); void BVC();
+    void TAX(); void TXA();
+    void TAY(); void TYA();
+    void TXS(); void TSX();
+    void PHA(); void PLA();
+    void PHP(); void PLP();
+    void SEC(); void CLC();
+    void SEI(); void CLI();
+    void SED(); void CLD();
+    void CLV();
+    void NOP();
+    void XXX();  // illegal/unknown opcode handler
+
+
 };
 
 #endif //INC_6502_EMULATOR_CPU_H
