@@ -38,6 +38,7 @@ public:
     Byte ReadByte(Word addr) const;
 
     void WriteByte(Word addr, Byte data);
+    void LoadBytes(std::initializer_list<Byte> , Word );
 
 
     ~Memory();

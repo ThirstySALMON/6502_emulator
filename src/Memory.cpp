@@ -34,3 +34,9 @@ void Memory::WriteByte(Word addr, Byte data) {
     assert(addr < MAX_MEM);
     mem[addr] = data;
 }
+
+void Memory::LoadBytes(std::initializer_list<Byte> bytes, Word startAddr) {
+    size_t i = startAddr;
+    for (Byte b : bytes)
+        mem[i++] = b;
+}
