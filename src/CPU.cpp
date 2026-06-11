@@ -10,6 +10,7 @@ CPU::CPU() {
 
     // Define valid opcodes
     lookup[0xA9] = {"LDA", &CPU::LDA, &CPU::IMM, 2};
+    lookup[0xA6] = {"LDAZP", &CPU::LDA, &CPU::ZP0, 3};
     lookup[0xEA] = {"NOP", &CPU::NOP, &CPU::IMP, 2};
 }
 void CPU::setflag(FLAGS f, bool value) {
@@ -21,15 +22,15 @@ bool CPU::getflag(FLAGS f) const {
     return status & f;
 }
 
-Byte CPU::FetchByte() {
+Byte CPU::Fetch_inst() {
     return mem->ReadByte(PC++);
 }
 
-Byte CPU::Fetch() {
+Byte CPU::Fetch_Byte() {
     // For implied/accumulator modes, fetched is already set
     // For other modes, read from the resolved address
-    fetched = mem->ReadByte(AbsAddr);
-    return fetched;
+    fetchedByte =  mem->ReadByte(AbsAddr);
+    return fetchedByte;
 }
 
 CPU::Instruction CPU::DecodeInst(Byte opcode) {
@@ -42,6 +43,7 @@ void CPU::IMM() {
 }
 
 void CPU::ZP0() {
+    AbsAddr = (0x00 << 8) | this->mem->ReadByte(PC++);
 }
 
 void CPU::ZPX() {
@@ -73,13 +75,13 @@ void CPU::REL() {
 
 void CPU::IMP() {
     // Implied mode: no operand, instruction operates on registers
-    fetched = A;  // Some implied instructions operate on accumulator
+    fetchedByte = A;  // Some implied instructions operate on accumulator
 }
 
 void CPU::LDA() {
     // Load Accumulator: A = M
-    Fetch();
-    A = fetched;
+    Fetch_Byte();
+    A = fetchedByte;
     setflag(Z, A == 0x00);
     setflag(N, A & 0x80);
 }
@@ -88,6 +90,10 @@ void CPU::STA() {
 }
 
 void CPU::LDX() {
+    Fetch_Byte();
+    X = fetchedByte;
+    setflag(Z, X == 0x00);
+    setflag(N, X & 0x80);
 }
 
 void CPU::STX() {
@@ -259,7 +265,7 @@ void CPU::clock(Memory& mem, int32_t cycles) {
     this->mem = &mem;
 
     while (cycles > 0) {
-        Byte opcode = FetchByte();
+        Byte opcode = Fetch_inst();
 
         Instruction inst = DecodeInst(opcode);
 

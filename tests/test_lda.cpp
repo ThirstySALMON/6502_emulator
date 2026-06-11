@@ -61,3 +61,53 @@ TEST(LDA, ImmediateClearsFlagsForPositiveValue) {
     EXPECT_FALSE(tb.cpu.getflag(CPU::Z));
     EXPECT_FALSE(tb.cpu.getflag(CPU::N));
 }
+
+// ---------------------------------------------------------------
+// LDA Zero Page  (opcode 0xA6, 3 cycles)
+// ---------------------------------------------------------------
+
+TEST(LDA, ZeroPageLoadsCorrectValue) {
+    TestBench tb;
+    tb.mem.WriteByte(0x0042, 0x37);  // value sitting in zero page
+    tb.load({ 0xA6, 0x42 });         // LDA $42
+    tb.run(3);
+    EXPECT_EQ(tb.cpu.A, 0x37);
+}
+
+TEST(LDA, ZeroPageSetsZeroFlag) {
+    TestBench tb;
+    tb.mem.WriteByte(0x0042, 0x00);
+    tb.load({ 0xA6, 0x42 });         // LDA $42
+    tb.run(3);
+    EXPECT_EQ(tb.cpu.A, 0x00);
+    EXPECT_TRUE(tb.cpu.getflag(CPU::Z));
+    EXPECT_FALSE(tb.cpu.getflag(CPU::N));
+}
+
+TEST(LDA, ZeroPageSetsNegativeFlag) {
+    TestBench tb;
+    tb.mem.WriteByte(0x0042, 0x80);  // bit 7 set
+    tb.load({ 0xA6, 0x42 });         // LDA $42
+    tb.run(3);
+    EXPECT_EQ(tb.cpu.A, 0x80);
+    EXPECT_TRUE(tb.cpu.getflag(CPU::N));
+    EXPECT_FALSE(tb.cpu.getflag(CPU::Z));
+}
+
+TEST(LDA, ZeroPageClearsFlagsForPositiveValue) {
+    TestBench tb;
+    tb.mem.WriteByte(0x0042, 0x42);  // neither zero nor negative
+    tb.load({ 0xA6, 0x42 });         // LDA $42
+    tb.run(3);
+    EXPECT_FALSE(tb.cpu.getflag(CPU::Z));
+    EXPECT_FALSE(tb.cpu.getflag(CPU::N));
+}
+
+TEST(LDA, ZeroPageReadsFromZeroPageNotAbsolute) {
+    TestBench tb;
+    tb.mem.WriteByte(0x0080, 0x11);  // the real target in zero page
+    tb.mem.WriteByte(0x8080, 0x99);  // decoy at the absolute address
+    tb.load({ 0xA6, 0x80 });         // LDA $80
+    tb.run(3);
+    EXPECT_EQ(tb.cpu.A, 0x11);
+}

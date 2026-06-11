@@ -42,7 +42,8 @@ private:
     // helpers
     Memory* mem = nullptr; // pointer to memory
     Word AbsAddr = 0x0000; // effective address after address resolution
-    Byte fetched = 0x00;   // fetched operand value for operations
+    Byte fetchedByte = 0x00;   // fetched operand value for operations
+    Word fetchedWord = 0x0000; // fetched operand value (Word)
     struct Instruction {
         const char*      name; // inst name
         void (CPU::*operate)(); // operation
@@ -50,8 +51,9 @@ private:
         uint8_t          cycles; // cycles taken
     };
 
-    Byte FetchByte();  // fetches the byte at memory address PC and increments PC by 1
-    Byte Fetch();      // fetches data using AbsAddr (or returns fetched for IMM mode)
+    Byte Fetch_inst();  // fetches the byte at memory address PC and increments PC by 1
+    Byte Fetch_Byte();      // fetches data using AbsAddr (or returns fetched for IMM mode)
+    Word Fetch_Word(); //  fetches data using AbsAddr (Word)
 
 
     Instruction DecodeInst (Byte);
@@ -59,7 +61,7 @@ private:
 
 
 
-    // Opcode -> Operation , addressing mode and cycle count
+
     std::array<Instruction, 256> lookup; // table for the 256 opcodes of the 6502
 
     // Addressing modes
