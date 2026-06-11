@@ -111,3 +111,53 @@ TEST(LDA, ZeroPageReadsFromZeroPageNotAbsolute) {
     tb.run(3);
     EXPECT_EQ(tb.cpu.A, 0x11);
 }
+
+// ---------------------------------------------------------------
+// LDA Absolute  (opcode 0xAD, 4 cycles)
+// ---------------------------------------------------------------
+
+TEST(LDA, AbsoluteLoadsCorrectValue) {
+    TestBench tb;
+    tb.mem.WriteByte(0x1234, 0x55);       // value at target address
+    tb.load({ 0xAD, 0x34, 0x12 });        // LDA $1234  (little-endian)
+    tb.run(4);
+    EXPECT_EQ(tb.cpu.A, 0x55);
+}
+
+TEST(LDA, AbsoluteSetsZeroFlag) {
+    TestBench tb;
+    tb.mem.WriteByte(0x1234, 0x00);
+    tb.load({ 0xAD, 0x34, 0x12 });        // LDA $1234
+    tb.run(4);
+    EXPECT_EQ(tb.cpu.A, 0x00);
+    EXPECT_TRUE(tb.cpu.getflag(CPU::Z));
+    EXPECT_FALSE(tb.cpu.getflag(CPU::N));
+}
+
+TEST(LDA, AbsoluteSetsNegativeFlag) {
+    TestBench tb;
+    tb.mem.WriteByte(0x1234, 0xFE);       // bit 7 set
+    tb.load({ 0xAD, 0x34, 0x12 });        // LDA $1234
+    tb.run(4);
+    EXPECT_EQ(tb.cpu.A, 0xFE);
+    EXPECT_TRUE(tb.cpu.getflag(CPU::N));
+    EXPECT_FALSE(tb.cpu.getflag(CPU::Z));
+}
+
+TEST(LDA, AbsoluteClearsFlagsForPositiveValue) {
+    TestBench tb;
+    tb.mem.WriteByte(0x1234, 0x42);
+    tb.load({ 0xAD, 0x34, 0x12 });        // LDA $1234
+    tb.run(4);
+    EXPECT_FALSE(tb.cpu.getflag(CPU::Z));
+    EXPECT_FALSE(tb.cpu.getflag(CPU::N));
+}
+
+TEST(LDA, AbsoluteReadsFullAddressLittleEndian) {
+    TestBench tb;
+    tb.mem.WriteByte(0x4321, 0x77);       // correct target
+    tb.mem.WriteByte(0x0043, 0x99);       // decoy: what ZP would load
+    tb.load({ 0xAD, 0x21, 0x43 });        // LDA $4321
+    tb.run(4);
+    EXPECT_EQ(tb.cpu.A, 0x77);
+}

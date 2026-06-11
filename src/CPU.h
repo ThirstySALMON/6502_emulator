@@ -13,7 +13,7 @@ public:
     Byte    SP     = 0xFF;  // 0xFF before reset walks it to 0xFD
     Word    PC     = 0x0000;
     Byte    status = 0x00;
-    int32_t Cycles = 0;
+    int64_t Cycles = 0;
 
 
     enum FLAGS : uint8_t {
@@ -27,11 +27,7 @@ public:
         N = (1 << 7),
     };
 
-
-
-
     CPU();
-
     void reset(Memory& mem);
     void clock(Memory& mem , int32_t);
 
@@ -52,7 +48,7 @@ private:
     };
 
     Byte Fetch_inst();  // fetches the byte at memory address PC and increments PC by 1
-    Byte Fetch_Byte();      // fetches data using AbsAddr (or returns fetched for IMM mode)
+    Byte Fetch_Byte();  // fetches data using AbsAddr (or returns fetched for IMM mode)
     Word Fetch_Word(); //  fetches data using AbsAddr (Word)
 
 

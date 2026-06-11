@@ -27,7 +27,6 @@ class Memory {
 private:
     // Constants
     static constexpr int MAX_MEM = 65536;
-    //
 
 
     std::array<uint8_t, MAX_MEM> mem{};  // {} zero-initializes everything
@@ -36,7 +35,6 @@ public:
     Memory();
     bool LoadImage(const std::filesystem::path& path, Word startAddr); // load memory image from file
     Byte ReadByte(Word addr) const;
-
     void WriteByte(Word addr, Byte data);
     void LoadBytes(std::initializer_list<Byte> , Word );
 

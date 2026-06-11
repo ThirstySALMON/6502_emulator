@@ -9,8 +9,9 @@ CPU::CPU() {
     }
 
     // Define valid opcodes
-    lookup[0xA9] = {"LDA", &CPU::LDA, &CPU::IMM, 2};
-    lookup[0xA6] = {"LDAZP", &CPU::LDA, &CPU::ZP0, 3};
+    lookup[0xA9] = {"LDA_imm", &CPU::LDA, &CPU::IMM, 2};
+    lookup[0xA6] = {"LDA_zp", &CPU::LDA, &CPU::ZP0, 3};
+    lookup[0xAD] = {"LDA_a", &CPU::LDA, &CPU::ABS, 4};
     lookup[0xEA] = {"NOP", &CPU::NOP, &CPU::IMP, 2};
 }
 void CPU::setflag(FLAGS f, bool value) {
@@ -53,6 +54,9 @@ void CPU::ZPY() {
 }
 
 void CPU::ABS() {
+    Byte lo = this->mem->ReadByte(PC++);
+    Byte hi = this->mem->ReadByte(PC++);
+    AbsAddr = (hi << 8) | lo;
 }
 
 void CPU::ABX() {
