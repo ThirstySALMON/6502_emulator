@@ -11,11 +11,21 @@ CPU::CPU() {
     // Define valid opcodes
     //LDA
     lookup[0xA9] = {"LDA_imm", &CPU::LDA, &CPU::IMM, 2};
-    lookup[0xA6] = {"LDA_zp", &CPU::LDA, &CPU::ZP0, 3};
+    lookup[0xA5] = {"LDA_zp", &CPU::LDA, &CPU::ZP0, 3};
     lookup[0xAD] = {"LDA_a", &CPU::LDA, &CPU::ABS, 4};
     lookup[0xB5] = {"LDA_zpX", &CPU::LDA, &CPU::ZPX, 4};
     lookup[0xBD] = {"LDA_abx", &CPU::LDA, &CPU::ABX, 4};
     lookup[0xB9] = {"LDA_aby", &CPU::LDA, &CPU::ABY, 4};
+    lookup[0xA1] = {"LDA_izx", &CPU::LDA, &CPU::IZX, 6};
+    lookup[0xB1] = {"LDA_izy", &CPU::LDA, &CPU::IZY, 5};
+
+
+    //LDX
+    lookup[0xA2] = {"LDX_imm", &CPU::LDX, &CPU::IMM, 2};
+    lookup[0xA6] = {"LDX_zp",  &CPU::LDX, &CPU::ZP0, 3};
+    lookup[0xB6] = {"LDX_zpy", &CPU::LDX, &CPU::ZPY, 4};
+    lookup[0xAE] = {"LDX_abs", &CPU::LDX, &CPU::ABS, 4};
+    lookup[0xBE] = {"LDX_aby", &CPU::LDX, &CPU::ABY, 4};
 
 
     lookup[0xEA] = {"NOP", &CPU::NOP, &CPU::IMP, 2};
@@ -55,13 +65,13 @@ uint8_t CPU::ZP0() {
 }
 
 uint8_t CPU::ZPX() {
-    Byte lo = (this->mem->ReadByte(PC++) + this->X);
+    Byte lo = (this->mem->ReadByte(PC++) + this->X) & 0xFF;
     AbsAddr = (0x00 << 8) | lo;
     return 0;
 }
 
 uint8_t CPU::ZPY() {
-    Byte lo = (this->mem->ReadByte(PC++) + this->Y);
+    Byte lo = (this->mem->ReadByte(PC++) + this->Y) & 0xFF;;
     AbsAddr = (0x00 << 8) | lo;
     return 0;
 }
@@ -84,27 +94,54 @@ uint8_t CPU::ABX() { // Can take an extra cycle
     return 0;
 }
 
-uint8_t CPU::ABY() { // Can take an extra cycle
+uint8_t CPU::ABY() {
     Byte lo = this->mem->ReadByte(PC++);
     Byte hi = this->mem->ReadByte(PC++);
     Word Base = (hi << 8) | lo;
     AbsAddr = Base + Y;
-    if ((AbsAddr & 0xFF00) != (Base & 0xFF00)) {
-        return 1;
-    }
-    return 0;
+    if ((AbsAddr & 0xFF00) != (Base & 0xFF00)) return 1;
     return 0;
 }
 
 uint8_t CPU::IND() {
+
+    Byte lo = this->mem->ReadByte(PC++);
+    Byte hi = this->mem->ReadByte(PC++);
+    Byte finaldst_lo = this->mem->ReadByte((hi << 8) | lo); // lower part
+
+    Byte finaldst_hi;
+    if (lo == 0xFF) {
+       finaldst_hi = this->mem->ReadByte((hi << 8) | 0x00); // higher part
+    }
+    else {
+        finaldst_hi = this->mem->ReadByte(((hi << 8) | lo) +1 ); // higher part
+    }
+
+    AbsAddr = (finaldst_hi << 8) | finaldst_lo ;
+
     return 0;
 }
 
 uint8_t CPU::IZX() {
+
+    Byte zp = this->mem->ReadByte(PC++);
+    Byte ptr = (zp + X) & 0xFF;           // add X, wrap within zero page
+
+    Byte lo  = mem->ReadByte(ptr);
+    Byte hi  = mem->ReadByte((ptr + 1) & 0xFF);  // wrap high byte ptr too
+
+    AbsAddr  = (hi << 8) | lo;
     return 0;
 }
 
+
 uint8_t CPU::IZY() {
+    Byte ptr  = this->mem->ReadByte(PC++);
+    Byte lo   = mem->ReadByte(ptr & 0xFF);
+    Byte hi   = mem->ReadByte((ptr + 1) & 0xFF);
+    Word base = (hi << 8) | lo;
+    AbsAddr   = base + Y;
+    if ((AbsAddr & 0xFF00) != (base & 0xFF00)) return 1;
     return 0;
 }
 
@@ -119,12 +156,23 @@ uint8_t CPU::IMP() {
     return 0;
 }
 
+
+
+
+
+
+
+
+
+// Instruction implementation
+
+
 uint8_t CPU::LDA() {
     Fetch_Byte();
     A = fetchedByte;
     setflag(Z, A == 0x00);
     setflag(N, A & 0x80);
-    return 0;
+    return 1;
 }
 
 uint8_t CPU::STA() { return 0; }
@@ -134,7 +182,7 @@ uint8_t CPU::LDX() {
     X = fetchedByte;
     setflag(Z, X == 0x00);
     setflag(N, X & 0x80);
-    return 0;
+    return 1;
 }
 
 uint8_t CPU::STX() { return 0; }

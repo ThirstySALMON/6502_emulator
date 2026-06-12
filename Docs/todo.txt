@@ -1,0 +1,92 @@
+**Addressing modes**
+
+Round 1:
+- [ ok] IMP — implied
+- [ ok] IMM — immediate
+- [ok ] ZP0 — zero page
+- [ ok] ABS — absolute
+
+Round 2:
+- [ ok] ZPX — zero page, X
+- [ ok] ZPY — zero page, Y
+- [ok ] ABX — absolute, X (+1 cycle on page cross)
+- [ ok] ABY — absolute, Y (+1 cycle on page cross)
+- [ok ] REL — relative (branches only)
+
+Round 3:
+- [ok ] IND — indirect (JMP only)
+- [ ok] IZX — (indirect, X)
+- [ok ] IZY — (indirect), Y (+1 cycle on page cross)
+
+---
+
+**Instructions**
+
+Load / store:
+- [ ok] LDA — load accumulator (page penalty: yes)
+- [ ] STA — store accumulator (page penalty: no)
+- [ ok] LDX — load X (page penalty: yes)
+- [ ] STX — store X (page penalty: no)
+- [ ] LDY — load Y (page penalty: yes)
+- [ ] STY — store Y (page penalty: no)
+
+Transfers:
+- [ ] TAX — A → X
+- [ ] TXA — X → A
+- [ ] TAY — A → Y
+- [ ] TYA — Y → A
+- [ ] TXS — X → SP
+- [ ] TSX — SP → X
+
+Jump / subroutine:
+- [ ] JMP — jump
+- [ ] JSR — jump to subroutine
+- [ ] RTS — return from subroutine
+
+Logical:
+- [ ] AND (page penalty: yes)
+- [ ] ORA (page penalty: yes)
+- [ ] EOR (page penalty: yes)
+
+Arithmetic:
+- [ ] ADC — add with carry (page penalty: yes)
+- [ ] SBC — subtract with carry (page penalty: yes)
+- [ ] INC — increment memory (page penalty: no)
+- [ ] DEC — decrement memory (page penalty: no)
+- [ ] INX — increment X
+- [ ] DEX — decrement X
+- [ ] INY — increment Y
+- [ ] DEY — decrement Y
+
+Compare:
+- [ ] CMP — compare A (page penalty: yes)
+- [ ] CPX — compare X
+- [ ] CPY — compare Y
+
+Branches (all use REL, no page penalty):
+- [ ] BEQ — branch if Z set
+- [ ] BNE — branch if Z clear
+- [ ] BCS — branch if C set
+- [ ] BCC — branch if C clear
+- [ ] BMI — branch if N set
+- [ ] BPL — branch if N clear
+- [ ] BVS — branch if V set
+- [ ] BVC — branch if V clear
+
+Stack:
+- [ ] PHA — push A
+- [ ] PLA — pull A
+- [ ] PHP — push status
+- [ ] PLP — pull status
+
+Flags:
+- [ ] SEC — set carry
+- [ ] CLC — clear carry
+- [ ] SEI — set interrupt disable
+- [ ] CLI — clear interrupt disable
+- [ ] SED — set decimal
+- [ ] CLD — clear decimal
+- [ ] CLV — clear overflow
+
+Misc:
+- [ ] NOP

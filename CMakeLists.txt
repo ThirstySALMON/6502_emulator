@@ -25,6 +25,7 @@ FetchContent_MakeAvailable(googletest)
 # --- Test executable ---
 add_executable(emu_tests
         tests/test_lda.cpp
+        tests/test_ldx.cpp
 )
 target_link_libraries(emu_tests 6502_lib GTest::gtest_main)
 
