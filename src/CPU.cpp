@@ -9,9 +9,15 @@ CPU::CPU() {
     }
 
     // Define valid opcodes
+    //LDA
     lookup[0xA9] = {"LDA_imm", &CPU::LDA, &CPU::IMM, 2};
     lookup[0xA6] = {"LDA_zp", &CPU::LDA, &CPU::ZP0, 3};
     lookup[0xAD] = {"LDA_a", &CPU::LDA, &CPU::ABS, 4};
+    lookup[0xB5] = {"LDA_zpX", &CPU::LDA, &CPU::ZPX, 4};
+    lookup[0xBD] = {"LDA_abx", &CPU::LDA, &CPU::ABX, 4};
+    lookup[0xB9] = {"LDA_aby", &CPU::LDA, &CPU::ABY, 4};
+
+
     lookup[0xEA] = {"NOP", &CPU::NOP, &CPU::IMP, 2};
 }
 void CPU::setflag(FLAGS f, bool value) {
@@ -38,210 +44,146 @@ CPU::Instruction CPU::DecodeInst(Byte opcode) {
     return lookup[opcode];
 }
 
-void CPU::IMM() {
-    // Immediate mode: the operand is the next byte after the opcode
+uint8_t CPU::IMM() {
     AbsAddr = PC++;
+    return 0;
 }
 
-void CPU::ZP0() {
+uint8_t CPU::ZP0() {
     AbsAddr = (0x00 << 8) | this->mem->ReadByte(PC++);
+    return 0;
 }
 
-void CPU::ZPX() {
+uint8_t CPU::ZPX() {
+    Byte lo = (this->mem->ReadByte(PC++) + this->X);
+    AbsAddr = (0x00 << 8) | lo;
+    return 0;
 }
 
-void CPU::ZPY() {
+uint8_t CPU::ZPY() {
+    Byte lo = (this->mem->ReadByte(PC++) + this->Y);
+    AbsAddr = (0x00 << 8) | lo;
+    return 0;
 }
 
-void CPU::ABS() {
+uint8_t CPU::ABS() {
     Byte lo = this->mem->ReadByte(PC++);
     Byte hi = this->mem->ReadByte(PC++);
     AbsAddr = (hi << 8) | lo;
+    return 0;
 }
 
-void CPU::ABX() {
+uint8_t CPU::ABX() { // Can take an extra cycle
+    Byte lo = this->mem->ReadByte(PC++);
+    Byte hi = this->mem->ReadByte(PC++);
+    Word Base = (hi << 8) | lo;
+    AbsAddr = Base + X;
+    if ((AbsAddr & 0xFF00) != (Base & 0xFF00)) {
+        return 1;
+    }
+    return 0;
 }
 
-void CPU::ABY() {
+uint8_t CPU::ABY() { // Can take an extra cycle
+    Byte lo = this->mem->ReadByte(PC++);
+    Byte hi = this->mem->ReadByte(PC++);
+    Word Base = (hi << 8) | lo;
+    AbsAddr = Base + Y;
+    if ((AbsAddr & 0xFF00) != (Base & 0xFF00)) {
+        return 1;
+    }
+    return 0;
+    return 0;
 }
 
-void CPU::IND() {
+uint8_t CPU::IND() {
+    return 0;
 }
 
-void CPU::IZX() {
+uint8_t CPU::IZX() {
+    return 0;
 }
 
-void CPU::IZY() {
+uint8_t CPU::IZY() {
+    return 0;
 }
 
-void CPU::REL() {
+uint8_t CPU::REL() { // needs testing
+    int8_t offset = static_cast<int8_t>(this->mem->ReadByte(PC++));
+    AbsAddr = PC + offset;
+    return 0;
 }
 
-void CPU::IMP() {
-    // Implied mode: no operand, instruction operates on registers
-    fetchedByte = A;  // Some implied instructions operate on accumulator
+uint8_t CPU::IMP() {
+    fetchedByte = A;
+    return 0;
 }
 
-void CPU::LDA() {
-    // Load Accumulator: A = M
+uint8_t CPU::LDA() {
     Fetch_Byte();
     A = fetchedByte;
     setflag(Z, A == 0x00);
     setflag(N, A & 0x80);
+    return 0;
 }
 
-void CPU::STA() {
-}
+uint8_t CPU::STA() { return 0; }
 
-void CPU::LDX() {
+uint8_t CPU::LDX() {
     Fetch_Byte();
     X = fetchedByte;
     setflag(Z, X == 0x00);
     setflag(N, X & 0x80);
+    return 0;
 }
 
-void CPU::STX() {
-}
-
-void CPU::LDY() {
-}
-
-void CPU::STY() {
-}
-
-void CPU::JMP() {
-}
-
-void CPU::JSR() {
-}
-
-void CPU::RTS() {
-}
-
-void CPU::AND() {
-}
-
-void CPU::ORA() {
-}
-
-void CPU::EOR() {
-}
-
-void CPU::ADC() {
-}
-
-void CPU::SBC() {
-}
-
-void CPU::INC() {
-}
-
-void CPU::DEC() {
-}
-
-void CPU::INX() {
-}
-
-void CPU::DEX() {
-}
-
-void CPU::INY() {
-}
-
-void CPU::DEY() {
-}
-
-void CPU::CMP() {
-}
-
-void CPU::CPX() {
-}
-
-void CPU::CPY() {
-}
-
-void CPU::BEQ() {
-}
-
-void CPU::BNE() {
-}
-
-void CPU::BCS() {
-}
-
-void CPU::BCC() {
-}
-
-void CPU::BMI() {
-}
-
-void CPU::BPL() {
-}
-
-void CPU::BVS() {
-}
-
-void CPU::BVC() {
-}
-
-void CPU::TAX() {
-}
-
-void CPU::TXA() {
-}
-
-void CPU::TAY() {
-}
-
-void CPU::TYA() {
-}
-
-void CPU::TXS() {
-}
-
-void CPU::TSX() {
-}
-
-void CPU::PHA() {
-}
-
-void CPU::PLA() {
-}
-
-void CPU::PHP() {
-}
-
-void CPU::PLP() {
-}
-
-void CPU::SEC() {
-}
-
-void CPU::CLC() {
-}
-
-void CPU::SEI() {
-}
-
-void CPU::CLI() {
-}
-
-void CPU::SED() {
-}
-
-void CPU::CLD() {
-}
-
-void CPU::CLV() {
-}
-
-void CPU::NOP() {
-    // No operation - does nothing
-}
-
-void CPU::XXX() {
-    // Illegal/unknown opcode - acts as NOP
-}
+uint8_t CPU::STX() { return 0; }
+uint8_t CPU::LDY() { return 0; }
+uint8_t CPU::STY() { return 0; }
+uint8_t CPU::JMP() { return 0; }
+uint8_t CPU::JSR() { return 0; }
+uint8_t CPU::RTS() { return 0; }
+uint8_t CPU::AND() { return 0; }
+uint8_t CPU::ORA() { return 0; }
+uint8_t CPU::EOR() { return 0; }
+uint8_t CPU::ADC() { return 0; }
+uint8_t CPU::SBC() { return 0; }
+uint8_t CPU::INC() { return 0; }
+uint8_t CPU::DEC() { return 0; }
+uint8_t CPU::INX() { return 0; }
+uint8_t CPU::DEX() { return 0; }
+uint8_t CPU::INY() { return 0; }
+uint8_t CPU::DEY() { return 0; }
+uint8_t CPU::CMP() { return 0; }
+uint8_t CPU::CPX() { return 0; }
+uint8_t CPU::CPY() { return 0; }
+uint8_t CPU::BEQ() { return 0; }
+uint8_t CPU::BNE() { return 0; }
+uint8_t CPU::BCS() { return 0; }
+uint8_t CPU::BCC() { return 0; }
+uint8_t CPU::BMI() { return 0; }
+uint8_t CPU::BPL() { return 0; }
+uint8_t CPU::BVS() { return 0; }
+uint8_t CPU::BVC() { return 0; }
+uint8_t CPU::TAX() { return 0; }
+uint8_t CPU::TXA() { return 0; }
+uint8_t CPU::TAY() { return 0; }
+uint8_t CPU::TYA() { return 0; }
+uint8_t CPU::TXS() { return 0; }
+uint8_t CPU::TSX() { return 0; }
+uint8_t CPU::PHA() { return 0; }
+uint8_t CPU::PLA() { return 0; }
+uint8_t CPU::PHP() { return 0; }
+uint8_t CPU::PLP() { return 0; }
+uint8_t CPU::SEC() { return 0; }
+uint8_t CPU::CLC() { return 0; }
+uint8_t CPU::SEI() { return 0; }
+uint8_t CPU::CLI() { return 0; }
+uint8_t CPU::SED() { return 0; }
+uint8_t CPU::CLD() { return 0; }
+uint8_t CPU::CLV() { return 0; }
+uint8_t CPU::NOP() { return 0; }
+uint8_t CPU::XXX() { return 0; }
 
 void CPU::reset(Memory& mem) {
     Cycles = 7;
@@ -280,13 +222,8 @@ void CPU::clock(Memory& mem, int32_t cycles) {
             continue;
         }
 
-        // Execute addressing mode (sets up AbsAddr and/or fetched)
-        (this->*inst.addrmode)();
-
-        // Execute the operation
-        (this->*inst.operate)();
-
-        // Consume cycles
-        cycles -= inst.cycles;
+        uint8_t extraAddr = (this->*inst.addrmode)();
+        uint8_t extraOp   = (this->*inst.operate)();
+        cycles -= inst.cycles + (extraAddr & extraOp);
     }
 }

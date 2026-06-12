@@ -41,10 +41,10 @@ private:
     Byte fetchedByte = 0x00;   // fetched operand value for operations
     Word fetchedWord = 0x0000; // fetched operand value (Word)
     struct Instruction {
-        const char*      name; // inst name
-        void (CPU::*operate)(); // operation
-        void (CPU::*addrmode)(); // addressing mode
-        uint8_t          cycles; // cycles taken
+        const char*        name;
+        uint8_t (CPU::*operate)();
+        uint8_t (CPU::*addrmode)();
+        uint8_t            cycles;
     };
 
     Byte Fetch_inst();  // fetches the byte at memory address PC and increments PC by 1
@@ -61,45 +61,45 @@ private:
     std::array<Instruction, 256> lookup; // table for the 256 opcodes of the 6502
 
     // Addressing modes
-    void IMM();  // Immediate
-    void ZP0();  // Zero page
-    void ZPX();  // Zero page, X
-    void ZPY();  // Zero page, Y
-    void ABS();  // Absolute
-    void ABX();  // Absolute, X
-    void ABY();  // Absolute, Y
-    void IND();  // Indirect
-    void IZX();  // Indirect, X
-    void IZY();  // Indirect, Y
-    void REL();  // Relative  (branches)
-    void IMP();  // Implied   (no operand)
+    uint8_t IMM();  // Immediate
+    uint8_t ZP0();  // Zero page
+    uint8_t ZPX();  // Zero page, X
+    uint8_t ZPY();  // Zero page, Y
+    uint8_t ABS();  // Absolute
+    uint8_t ABX();  // Absolute, X
+    uint8_t ABY();  // Absolute, Y
+    uint8_t IND();  // Indirect
+    uint8_t IZX();  // Indirect, X
+    uint8_t IZY();  // Indirect, Y
+    uint8_t REL();  // Relative  (branches)
+    uint8_t IMP();  // Implied   (no operand)
 
     // Operations
-    void LDA(); void STA();
-    void LDX(); void STX();
-    void LDY(); void STY();
-    void JMP(); void JSR(); void RTS();
-    void AND(); void ORA(); void EOR();
-    void ADC(); void SBC();
-    void INC(); void DEC();
-    void INX(); void DEX();
-    void INY(); void DEY();
-    void CMP(); void CPX(); void CPY();
-    void BEQ(); void BNE();
-    void BCS(); void BCC();
-    void BMI(); void BPL();
-    void BVS(); void BVC();
-    void TAX(); void TXA();
-    void TAY(); void TYA();
-    void TXS(); void TSX();
-    void PHA(); void PLA();
-    void PHP(); void PLP();
-    void SEC(); void CLC();
-    void SEI(); void CLI();
-    void SED(); void CLD();
-    void CLV();
-    void NOP();
-    void XXX();  // illegal/unknown opcode handler
+    uint8_t LDA(); uint8_t STA();
+    uint8_t LDX(); uint8_t STX();
+    uint8_t LDY(); uint8_t STY();
+    uint8_t JMP(); uint8_t JSR(); uint8_t RTS();
+    uint8_t AND(); uint8_t ORA(); uint8_t EOR();
+    uint8_t ADC(); uint8_t SBC();
+    uint8_t INC(); uint8_t DEC();
+    uint8_t INX(); uint8_t DEX();
+    uint8_t INY(); uint8_t DEY();
+    uint8_t CMP(); uint8_t CPX(); uint8_t CPY();
+    uint8_t BEQ(); uint8_t BNE();
+    uint8_t BCS(); uint8_t BCC();
+    uint8_t BMI(); uint8_t BPL();
+    uint8_t BVS(); uint8_t BVC();
+    uint8_t TAX(); uint8_t TXA();
+    uint8_t TAY(); uint8_t TYA();
+    uint8_t TXS(); uint8_t TSX();
+    uint8_t PHA(); uint8_t PLA();
+    uint8_t PHP(); uint8_t PLP();
+    uint8_t SEC(); uint8_t CLC();
+    uint8_t SEI(); uint8_t CLI();
+    uint8_t SED(); uint8_t CLD();
+    uint8_t CLV();
+    uint8_t NOP();
+    uint8_t XXX();  // illegal/unknown opcode handler
 
 
 };

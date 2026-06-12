@@ -161,3 +161,152 @@ TEST(LDA, AbsoluteReadsFullAddressLittleEndian) {
     tb.run(4);
     EXPECT_EQ(tb.cpu.A, 0x77);
 }
+
+// ---------------------------------------------------------------
+// LDA Zero Page, X  (opcode 0xB5, 4 cycles)
+// Effective address = (operand + X) & 0xFF — always stays in page 0
+// ---------------------------------------------------------------
+
+TEST(LDA, ZeroPageXLoadsCorrectValue) {
+    TestBench tb;
+    tb.cpu.X = 0x05;
+    tb.mem.WriteByte(0x0047, 0x33);       // $42 + $05 = $47
+    tb.load({ 0xB5, 0x42 });              // LDA $42,X
+    tb.run(4);
+    EXPECT_EQ(tb.cpu.A, 0x33);
+}
+
+TEST(LDA, ZeroPageXSetsZeroFlag) {
+    TestBench tb;
+    tb.cpu.X = 0x01;
+    tb.mem.WriteByte(0x0043, 0x00);       // $42 + $01 = $43
+    tb.load({ 0xB5, 0x42 });              // LDA $42,X
+    tb.run(4);
+    EXPECT_EQ(tb.cpu.A, 0x00);
+    EXPECT_TRUE(tb.cpu.getflag(CPU::Z));
+    EXPECT_FALSE(tb.cpu.getflag(CPU::N));
+}
+
+TEST(LDA, ZeroPageXSetsNegativeFlag) {
+    TestBench tb;
+    tb.cpu.X = 0x02;
+    tb.mem.WriteByte(0x0044, 0x80);       // $42 + $02 = $44, bit 7 set
+    tb.load({ 0xB5, 0x42 });              // LDA $42,X
+    tb.run(4);
+    EXPECT_EQ(tb.cpu.A, 0x80);
+    EXPECT_TRUE(tb.cpu.getflag(CPU::N));
+    EXPECT_FALSE(tb.cpu.getflag(CPU::Z));
+}
+
+TEST(LDA, ZeroPageXClearsFlagsForPositiveValue) {
+    TestBench tb;
+    tb.cpu.X = 0x10;
+    tb.mem.WriteByte(0x0052, 0x42);       // $42 + $10 = $52
+    tb.load({ 0xB5, 0x42 });              // LDA $42,X
+    tb.run(4);
+    EXPECT_FALSE(tb.cpu.getflag(CPU::Z));
+    EXPECT_FALSE(tb.cpu.getflag(CPU::N));
+}
+
+TEST(LDA, ZeroPageXWrapsAroundZeroPage) {
+    TestBench tb;
+    tb.cpu.X = 0x20;
+    // ($F0 + $20) & 0xFF = $10 — must NOT read from $0110
+    tb.mem.WriteByte(0x0010, 0xAB);       // correct: wrapped target
+    tb.mem.WriteByte(0x0110, 0xCC);       // decoy: unwrapped absolute address
+    tb.load({ 0xB5, 0xF0 });              // LDA $F0,X
+    tb.run(4);
+    EXPECT_EQ(tb.cpu.A, 0xAB);
+}
+
+// ---------------------------------------------------------------
+// LDA Absolute, X  (opcode 0xBD, 4 cycles; +1 on page cross)
+// Effective address = base + X
+// ---------------------------------------------------------------
+
+TEST(LDA, AbsoluteXLoadsCorrectValue) {
+    TestBench tb;
+    tb.cpu.X = 0x05;
+    tb.mem.WriteByte(0x1205, 0x44);       // $1200 + $05 = $1205
+    tb.load({ 0xBD, 0x00, 0x12 });        // LDA $1200,X
+    tb.run(4);
+    EXPECT_EQ(tb.cpu.A, 0x44);
+}
+
+TEST(LDA, AbsoluteXSetsZeroFlag) {
+    TestBench tb;
+    tb.cpu.X = 0x01;
+    tb.mem.WriteByte(0x1201, 0x00);
+    tb.load({ 0xBD, 0x00, 0x12 });        // LDA $1200,X
+    tb.run(4);
+    EXPECT_EQ(tb.cpu.A, 0x00);
+    EXPECT_TRUE(tb.cpu.getflag(CPU::Z));
+    EXPECT_FALSE(tb.cpu.getflag(CPU::N));
+}
+
+TEST(LDA, AbsoluteXSetsNegativeFlag) {
+    TestBench tb;
+    tb.cpu.X = 0x02;
+    tb.mem.WriteByte(0x1202, 0xFF);       // bit 7 set
+    tb.load({ 0xBD, 0x00, 0x12 });        // LDA $1200,X
+    tb.run(4);
+    EXPECT_EQ(tb.cpu.A, 0xFF);
+    EXPECT_TRUE(tb.cpu.getflag(CPU::N));
+    EXPECT_FALSE(tb.cpu.getflag(CPU::Z));
+}
+
+TEST(LDA, AbsoluteXPageCrossReadsCorrectValue) {
+    TestBench tb;
+    tb.cpu.X = 0x10;
+    // $12F5 + $10 = $1305 — crosses from page $12 to page $13
+    tb.mem.WriteByte(0x1305, 0x55);
+    tb.load({ 0xBD, 0xF5, 0x12 });        // LDA $12F5,X
+    tb.run(5);                             // 4 base + 1 page-cross penalty
+    EXPECT_EQ(tb.cpu.A, 0x55);
+}
+
+// ---------------------------------------------------------------
+// LDA Absolute, Y  (opcode 0xB9, 4 cycles; +1 on page cross)
+// Effective address = base + Y
+// ---------------------------------------------------------------
+
+TEST(LDA, AbsoluteYLoadsCorrectValue) {
+    TestBench tb;
+    tb.cpu.Y = 0x03;
+    tb.mem.WriteByte(0x1203, 0x66);       // $1200 + $03 = $1203
+    tb.load({ 0xB9, 0x00, 0x12 });        // LDA $1200,Y
+    tb.run(4);
+    EXPECT_EQ(tb.cpu.A, 0x66);
+}
+
+TEST(LDA, AbsoluteYSetsZeroFlag) {
+    TestBench tb;
+    tb.cpu.Y = 0x04;
+    tb.mem.WriteByte(0x1204, 0x00);
+    tb.load({ 0xB9, 0x00, 0x12 });        // LDA $1200,Y
+    tb.run(4);
+    EXPECT_EQ(tb.cpu.A, 0x00);
+    EXPECT_TRUE(tb.cpu.getflag(CPU::Z));
+    EXPECT_FALSE(tb.cpu.getflag(CPU::N));
+}
+
+TEST(LDA, AbsoluteYSetsNegativeFlag) {
+    TestBench tb;
+    tb.cpu.Y = 0x05;
+    tb.mem.WriteByte(0x1205, 0x81);       // bit 7 set
+    tb.load({ 0xB9, 0x00, 0x12 });        // LDA $1200,Y
+    tb.run(4);
+    EXPECT_EQ(tb.cpu.A, 0x81);
+    EXPECT_TRUE(tb.cpu.getflag(CPU::N));
+    EXPECT_FALSE(tb.cpu.getflag(CPU::Z));
+}
+
+TEST(LDA, AbsoluteYPageCrossReadsCorrectValue) {
+    TestBench tb;
+    tb.cpu.Y = 0x20;
+    // $12E0 + $20 = $1300 — crosses from page $12 to page $13
+    tb.mem.WriteByte(0x1300, 0x77);
+    tb.load({ 0xB9, 0xE0, 0x12 });        // LDA $12E0,Y
+    tb.run(5);                             // 4 base + 1 page-cross penalty
+    EXPECT_EQ(tb.cpu.A, 0x77);
+}
