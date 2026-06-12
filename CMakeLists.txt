@@ -26,6 +26,11 @@ FetchContent_MakeAvailable(googletest)
 add_executable(emu_tests
         tests/test_lda.cpp
         tests/test_ldx.cpp
+        tests/test_ldy.cpp
+        tests/test_sta.cpp
+        tests/test_stx.cpp
+        tests/test_sty.cpp
+        tests/test_programs.cpp
 )
 target_link_libraries(emu_tests 6502_lib GTest::gtest_main)
 

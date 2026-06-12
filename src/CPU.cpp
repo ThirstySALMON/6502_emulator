@@ -9,23 +9,49 @@ CPU::CPU() {
     }
 
     // Define valid opcodes
-    //LDA
+    // --- LDA ---
     lookup[0xA9] = {"LDA_imm", &CPU::LDA, &CPU::IMM, 2};
-    lookup[0xA5] = {"LDA_zp", &CPU::LDA, &CPU::ZP0, 3};
-    lookup[0xAD] = {"LDA_a", &CPU::LDA, &CPU::ABS, 4};
-    lookup[0xB5] = {"LDA_zpX", &CPU::LDA, &CPU::ZPX, 4};
+    lookup[0xA5] = {"LDA_zp",  &CPU::LDA, &CPU::ZP0, 3};
+    lookup[0xB5] = {"LDA_zpx", &CPU::LDA, &CPU::ZPX, 4};
+    lookup[0xAD] = {"LDA_abs", &CPU::LDA, &CPU::ABS, 4};
     lookup[0xBD] = {"LDA_abx", &CPU::LDA, &CPU::ABX, 4};
     lookup[0xB9] = {"LDA_aby", &CPU::LDA, &CPU::ABY, 4};
     lookup[0xA1] = {"LDA_izx", &CPU::LDA, &CPU::IZX, 6};
     lookup[0xB1] = {"LDA_izy", &CPU::LDA, &CPU::IZY, 5};
 
+    // --- STA ---
+    lookup[0x85] = {"STA_zp",  &CPU::STA, &CPU::ZP0, 3};
+    lookup[0x95] = {"STA_zpx", &CPU::STA, &CPU::ZPX, 4};
+    lookup[0x8D] = {"STA_abs", &CPU::STA, &CPU::ABS, 4};
+    lookup[0x9D] = {"STA_abx", &CPU::STA, &CPU::ABX, 5};  // note: always 5, no page penalty
+    lookup[0x99] = {"STA_aby", &CPU::STA, &CPU::ABY, 5};  // note: always 5, no page penalty
+    lookup[0x81] = {"STA_izx", &CPU::STA, &CPU::IZX, 6};
+    lookup[0x91] = {"STA_izy", &CPU::STA, &CPU::IZY, 6};  // note: always 6, no page penalty
 
-    //LDX
+    // --- LDX ---
     lookup[0xA2] = {"LDX_imm", &CPU::LDX, &CPU::IMM, 2};
     lookup[0xA6] = {"LDX_zp",  &CPU::LDX, &CPU::ZP0, 3};
     lookup[0xB6] = {"LDX_zpy", &CPU::LDX, &CPU::ZPY, 4};
     lookup[0xAE] = {"LDX_abs", &CPU::LDX, &CPU::ABS, 4};
-    lookup[0xBE] = {"LDX_aby", &CPU::LDX, &CPU::ABY, 4};
+    lookup[0xBE] = {"LDX_aby", &CPU::LDX, &CPU::ABY, 4};  // +1 on page cross
+
+    // --- STX ---
+    lookup[0x86] = {"STX_zp",  &CPU::STX, &CPU::ZP0, 3};
+    lookup[0x96] = {"STX_zpy", &CPU::STX, &CPU::ZPY, 4};
+    lookup[0x8E] = {"STX_abs", &CPU::STX, &CPU::ABS, 4};
+
+    // --- LDY ---
+    lookup[0xA0] = {"LDY_imm", &CPU::LDY, &CPU::IMM, 2};
+    lookup[0xA4] = {"LDY_zp",  &CPU::LDY, &CPU::ZP0, 3};
+    lookup[0xB4] = {"LDY_zpx", &CPU::LDY, &CPU::ZPX, 4};
+    lookup[0xAC] = {"LDY_abs", &CPU::LDY, &CPU::ABS, 4};
+    lookup[0xBC] = {"LDY_abx", &CPU::LDY, &CPU::ABX, 4};  // +1 on page cross
+
+    // --- STY ---
+    lookup[0x84] = {"STY_zp",  &CPU::STY, &CPU::ZP0, 3};
+    lookup[0x94] = {"STY_zpx", &CPU::STY, &CPU::ZPX, 4};
+    lookup[0x8C] = {"STY_abs", &CPU::STY, &CPU::ABS, 4};
+
 
 
     lookup[0xEA] = {"NOP", &CPU::NOP, &CPU::IMP, 2};
@@ -175,7 +201,10 @@ uint8_t CPU::LDA() {
     return 1;
 }
 
-uint8_t CPU::STA() { return 0; }
+uint8_t CPU::STA() {
+    mem->WriteByte(AbsAddr , A);
+    return 0;
+}
 
 uint8_t CPU::LDX() {
     Fetch_Byte();
@@ -185,9 +214,23 @@ uint8_t CPU::LDX() {
     return 1;
 }
 
-uint8_t CPU::STX() { return 0; }
-uint8_t CPU::LDY() { return 0; }
-uint8_t CPU::STY() { return 0; }
+uint8_t CPU::STX() {
+    mem->WriteByte(AbsAddr , X);
+    return 0;
+}
+
+uint8_t CPU::LDY() {
+    Fetch_Byte();
+    Y = fetchedByte;
+    setflag(Z, Y == 0x00);
+    setflag(N, Y & 0x80);
+    return 1;
+}
+
+uint8_t CPU::STY() {
+    mem->WriteByte(AbsAddr , Y);
+    return 0;
+}
 uint8_t CPU::JMP() { return 0; }
 uint8_t CPU::JSR() { return 0; }
 uint8_t CPU::RTS() { return 0; }
