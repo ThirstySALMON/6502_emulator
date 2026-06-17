@@ -426,9 +426,32 @@ uint8_t CPU::INX() { return 0; }
 uint8_t CPU::DEX() { return 0; }
 uint8_t CPU::INY() { return 0; }
 uint8_t CPU::DEY() { return 0; }
-uint8_t CPU::CMP() { return 0; }
-uint8_t CPU::CPX() { return 0; }
-uint8_t CPU::CPY() { return 0; }
+
+uint8_t CPU::CMP() {
+    Byte operand = mem->ReadByte(AbsAddr);
+    Byte result  = A - operand;
+    setflag(C, A >= operand);
+    setflag(Z, result == 0);
+    setflag(N, result & 0x80);
+    return 1;
+}
+uint8_t CPU::CPX() {
+    Byte operand = mem->ReadByte(AbsAddr);
+    Byte result  = X - operand;
+    setflag(C, X >= operand);
+    setflag(Z, result == 0);
+    setflag(N, result & 0x80);
+    return 0;
+}
+uint8_t CPU::CPY() {
+    Byte operand = mem->ReadByte(AbsAddr);
+    Byte result  = Y - operand;
+    setflag(C, Y >= operand);
+    setflag(Z, result == 0);
+    setflag(N, result & 0x80);
+    return 0;
+}
+
 uint8_t CPU::BEQ() { return 0; }
 uint8_t CPU::BNE() { return 0; }
 uint8_t CPU::BCS() { return 0; }

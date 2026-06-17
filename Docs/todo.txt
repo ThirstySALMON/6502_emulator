@@ -3,8 +3,8 @@
 Round 1:
 - [ ok] IMP — implied
 - [ ok] IMM — immediate
-- [ok ] ZP0 — zero page
-- [ ok] ABS — absolute
+- [ok] ZP0 — zero page
+- [ok] ABS — absolute
 
 Round 2:
 - [ ok] ZPX — zero page, X
@@ -59,9 +59,9 @@ Arithmetic:
 - [ ] DEY — decrement Y
 
 Compare:
-- [ ] CMP — compare A (page penalty: yes)
-- [ ] CPX — compare X
-- [ ] CPY — compare Y
+- [ok] CMP — compare A (page penalty: yes)
+- [ok] CPX — compare X
+- [ok] CPY — compare Y
 
 Branches (all use REL, no page penalty):
 - [ ] BEQ — branch if Z set

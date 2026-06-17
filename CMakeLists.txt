@@ -35,6 +35,7 @@ add_executable(emu_tests
         tests/test_jsr_rts.cpp
         tests/test_programs.cpp
         tests/test_logical.cpp
+        tests/test_compare.cpp
 )
 target_link_libraries(emu_tests 6502_lib GTest::gtest_main)
 
