@@ -31,22 +31,22 @@ Load / store:
 - [ ok] STY — store Y (page penalty: no)
 
 Transfers:
-- [ ] TAX — A → X
-- [ ] TXA — X → A
-- [ ] TAY — A → Y
-- [ ] TYA — Y → A
-- [ ] TXS — X → SP
-- [ ] TSX — SP → X
+- [ok ] TAX — A → X
+- [ ok] TXA — X → A
+- [ ok] TAY — A → Y
+- [ ok] TYA — Y → A
+- [ok ] TXS — X → SP
+- [ ok] TSX — SP → X
 
 Jump / subroutine:
-- [ ] JMP — jump
-- [ ] JSR — jump to subroutine
-- [ ] RTS — return from subroutine
+- [ok ] JMP — jump
+- [ok] JSR — jump to subroutine  <---
+- [ ok] RTS — return from subroutine <---
 
 Logical:
-- [ ] AND (page penalty: yes)
-- [ ] ORA (page penalty: yes)
-- [ ] EOR (page penalty: yes)
+- [ok] AND (page penalty: yes)
+- [ok] ORA (page penalty: yes)
+- [ok] EOR (page penalty: yes)
 
 Arithmetic:
 - [ ] ADC — add with carry (page penalty: yes)
@@ -89,4 +89,4 @@ Flags:
 - [ ] CLV — clear overflow
 
 Misc:
-- [ ] NOP
+- [ok] NOP
