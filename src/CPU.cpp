@@ -514,15 +514,63 @@ uint8_t CPU::PHA() { return 0; }
 uint8_t CPU::PLA() { return 0; }
 uint8_t CPU::PHP() { return 0; }
 uint8_t CPU::PLP() { return 0; }
-uint8_t CPU::SEC() { return 0; }
-uint8_t CPU::CLC() { return 0; }
-uint8_t CPU::SEI() { return 0; }
-uint8_t CPU::CLI() { return 0; }
-uint8_t CPU::SED() { return 0; }
-uint8_t CPU::CLD() { return 0; }
-uint8_t CPU::CLV() { return 0; }
-uint8_t CPU::NOP() { return 0; }
-uint8_t CPU::XXX() { return 0; }
+
+
+
+uint8_t CPU::SEC() {
+    setflag((C ) , true);
+
+    return 0;
+}
+uint8_t CPU::CLC() {
+
+    setflag((C ) , false);
+
+    return 0;
+}
+
+uint8_t CPU::SEI() {
+
+
+    setflag(I , true);
+    return 0;
+}
+uint8_t CPU::CLI() {
+
+    setflag(I , false);
+
+
+
+    return 0;
+}
+uint8_t CPU::SED() {
+
+    setflag((D) , true);
+
+    return 0;
+}
+uint8_t CPU::CLD() {
+    setflag((D) , false);
+
+    return 0;
+}
+uint8_t CPU::CLV() {
+
+    setflag(V , false);
+
+
+    return 0;
+}
+
+
+
+uint8_t CPU::NOP() { return 0; } // do nothing just consume cycles
+
+
+uint8_t CPU::XXX() { return 0; } // might add exception thrown later
+
+
+
 
 void CPU::reset(Memory& mem) {
     Cycles = 7;

@@ -80,13 +80,13 @@ Stack:
 - [ ] PLP — pull status
 
 Flags:
-- [ ] SEC — set carry
-- [ ] CLC — clear carry
-- [ ] SEI — set interrupt disable
-- [ ] CLI — clear interrupt disable
-- [ ] SED — set decimal
-- [ ] CLD — clear decimal
-- [ ] CLV — clear overflow
+- [ok ] SEC — set carry
+- [ ok] CLC — clear carry
+- [ ok] SEI — set interrupt disable
+- [ ok] CLI — clear interrupt disable
+- [ ok] SED — set decimal
+- [ ok] CLD — clear decimal
+- [ ok] CLV — clear overflow
 
 Misc:
 - [ok] NOP
