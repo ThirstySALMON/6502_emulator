@@ -420,6 +420,7 @@ uint8_t CPU::EOR() {
 
 uint8_t CPU::ADC() { return 0; }
 uint8_t CPU::SBC() { return 0; }
+
 uint8_t CPU::INC() { return 0; }
 uint8_t CPU::DEC() { return 0; }
 uint8_t CPU::INX() { return 0; }
@@ -506,14 +507,39 @@ uint8_t CPU::TSX() {
     setflag(Z, X == 0x00);
     setflag(N, X & 0x80);
 
+
     return 0;
 }
 
 
-uint8_t CPU::PHA() { return 0; }
-uint8_t CPU::PLA() { return 0; }
-uint8_t CPU::PHP() { return 0; }
-uint8_t CPU::PLP() { return 0; }
+uint8_t CPU::PHA()
+{
+    mem->WriteByte(0x0100 + SP , A);
+    SP--;
+    return 0;
+}
+uint8_t CPU::PLA() {
+
+    SP++;
+    A = mem->ReadByte(0x0100 + SP );
+    setflag(Z, A == 0x00);
+    setflag(N, A & 0x80);
+
+
+    return 0;
+}
+uint8_t CPU::PHP() {
+    mem->WriteByte(0x0100 + SP , status);
+    SP--;
+    return 0;
+}
+uint8_t CPU::PLP() {
+
+    SP++;
+    status = mem->ReadByte(0x0100 + SP );
+
+    return 0;
+}
 
 
 
@@ -568,6 +594,12 @@ uint8_t CPU::NOP() { return 0; } // do nothing just consume cycles
 
 
 uint8_t CPU::XXX() { return 0; } // might add exception thrown later
+
+
+
+
+
+
 
 
 

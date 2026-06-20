@@ -74,10 +74,10 @@ Branches (all use REL, no page penalty):
 - [ ] BVC — branch if V clear
 
 Stack:
-- [ ] PHA — push A
-- [ ] PLA — pull A
-- [ ] PHP — push status
-- [ ] PLP — pull status
+- [ok] PHA — push A
+- [ok] PLA — pull A
+- [ok] PHP — push status
+- [ok] PLP — pull status
 
 Flags:
 - [ok ] SEC — set carry
@@ -88,5 +88,13 @@ Flags:
 - [ ok] CLD — clear decimal
 - [ ok] CLV — clear overflow
 
+Rotate
+ASL
+LSR
+ROL
+ROR
+BIT
+BRk
+RTI
 Misc:
 - [ok] NOP
