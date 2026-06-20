@@ -421,12 +421,55 @@ uint8_t CPU::EOR() {
 uint8_t CPU::ADC() { return 0; }
 uint8_t CPU::SBC() { return 0; }
 
-uint8_t CPU::INC() { return 0; }
-uint8_t CPU::DEC() { return 0; }
-uint8_t CPU::INX() { return 0; }
-uint8_t CPU::DEX() { return 0; }
-uint8_t CPU::INY() { return 0; }
-uint8_t CPU::DEY() { return 0; }
+uint8_t CPU::INC() {
+
+    Byte temp = Fetch_Byte();
+    temp++;
+    mem->WriteByte(AbsAddr , temp);
+    setflag(Z , temp == 0);
+    setflag(N , temp & 0x80);
+
+    return 0;
+}
+uint8_t CPU::DEC() {
+    Byte temp = Fetch_Byte();
+    temp--;
+    mem->WriteByte(AbsAddr , temp);
+    setflag(Z , temp == 0);
+    setflag(N , temp & 0x80);
+
+    return 0;
+}
+uint8_t CPU::INX() {
+
+    X++;
+
+    setflag(Z , X == 0);
+    setflag(N , X & 0x80);
+    return 0;
+}
+uint8_t CPU::DEX() {
+
+    X--;
+    setflag(Z , X == 0);
+    setflag(N , X & 0x80);
+    return 0;
+}
+uint8_t CPU::INY() {
+
+    Y++;
+    setflag(Z , Y == 0);
+    setflag(N , Y & 0x80);
+
+    return 0;
+}
+uint8_t CPU::DEY() {
+    Y--;
+    setflag(Z , Y == 0);
+    setflag(N , Y & 0x80);
+
+    return 0;
+}
 
 uint8_t CPU::CMP() {
     Byte operand = mem->ReadByte(AbsAddr);
@@ -624,6 +667,7 @@ void CPU::reset(Memory& mem) {
     Byte hi = mem.ReadByte(0xFFFD); Cycles--; // cycle 7
 
     PC = (hi << 8) | lo;
+    Total_cycles = 7;
 }
 
 void CPU::clock(Memory& mem, int32_t cycles) {
@@ -638,11 +682,17 @@ void CPU::clock(Memory& mem, int32_t cycles) {
         if (inst.addrmode == nullptr || inst.operate == nullptr) {
             // Handle as illegal opcode - treat like NOP but consume 1 cycle
             cycles--;
+            Total_cycles++;
             continue;
         }
 
         uint8_t extraAddr = (this->*inst.addrmode)();
         uint8_t extraOp   = (this->*inst.operate)();
-        cycles -= inst.cycles + (extraAddr & extraOp);
+        cycles -= inst.cycles + (extraAddr & extraOp); // given cycles to run
+        Total_cycles += inst.cycles + (extraAddr & extraOp);
     }
+}
+
+uint64_t CPU::get_elapsed_cycles() const {
+    return Total_cycles;
 }

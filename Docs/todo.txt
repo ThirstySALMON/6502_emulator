@@ -51,19 +51,22 @@ Logical:
 Arithmetic:
 - [ ] ADC — add with carry (page penalty: yes)
 - [ ] SBC — subtract with carry (page penalty: yes)
-- [ ] INC — increment memory (page penalty: no)
-- [ ] DEC — decrement memory (page penalty: no)
-- [ ] INX — increment X
-- [ ] DEX — decrement X
-- [ ] INY — increment Y
-- [ ] DEY — decrement Y
+
+
+- [ok] INC — increment memory (page penalty: no)
+- [ok] DEC — decrement memory (page penalty: no)
+
+- [ok] INX — increment X
+- [ok] DEX — decrement X
+- [ok] INY — increment Y
+- [ok] DEY — decrement Y
 
 Compare:
 - [ok] CMP — compare A (page penalty: yes)
 - [ok] CPX — compare X
 - [ok] CPY — compare Y
 
-Branches (all use REL, no page penalty):
+Branches (all use REL, Yes page penalty):
 - [ ] BEQ — branch if Z set
 - [ ] BNE — branch if Z clear
 - [ ] BCS — branch if C set

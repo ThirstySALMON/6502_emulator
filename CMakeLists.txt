@@ -37,6 +37,8 @@ add_executable(emu_tests
         tests/test_logical.cpp
         tests/test_compare.cpp
         tests/test_stack.cpp
+        tests/test_inc_dec.cpp
+        tests/test_flags.cpp
 )
 target_link_libraries(emu_tests 6502_lib GTest::gtest_main)
 

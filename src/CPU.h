@@ -16,6 +16,10 @@ public:
     int64_t Cycles = 0;
 
 
+
+
+
+
     enum FLAGS : uint8_t {
         C = (1 << 0),
         Z = (1 << 1),
@@ -30,7 +34,7 @@ public:
     CPU();
     void reset(Memory& mem);
     void clock(Memory& mem , int32_t);
-
+    uint64_t get_elapsed_cycles() const; // returns total cycles used
     void setflag(FLAGS f, bool value);
     bool getflag(FLAGS f) const;
 
@@ -40,12 +44,16 @@ private:
     Word AbsAddr = 0x0000; // effective address after address resolution
     Byte fetchedByte = 0x00;   // fetched operand value for operations
     Word fetchedWord = 0x0000; // fetched operand value (Word)
+
+    uint64_t Total_cycles = 0 ; // total cycles consumed since last reset
     struct Instruction {
         const char*        name;
         uint8_t (CPU::*operate)();
         uint8_t (CPU::*addrmode)();
         uint8_t            cycles;
     };
+
+
 
     Byte Fetch_inst();  // fetches the byte at memory address PC and increments PC by 1
     Byte Fetch_Byte();  // fetches data using AbsAddr (or returns fetched for IMM mode)
